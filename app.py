@@ -5,8 +5,19 @@ from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# Configuración de CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Puedes cambiarlo por dominios específicos
+    allow_credentials=True,
+    allow_methods=["*"],  # Permitir todos los métodos (GET, POST, etc.)
+    allow_headers=["*"],  # Permitir todos los encabezados
+)
+
 
 # Configuración del limitador de peticiones (máx. 5 por minuto por IP)
 limiter = Limiter(key_func=get_remote_address)
