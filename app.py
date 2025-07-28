@@ -6,8 +6,21 @@ from fastapi.responses import JSONResponse
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+
+load_dotenv()
+
 
 app = FastAPI()
+
+# Configuración de Jinja2 para plantillas
+templates = Jinja2Templates(directory="templates")
+
+# Montar archivos estáticos
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Configuración de CORS
 app.add_middleware(
@@ -30,6 +43,11 @@ BASE_URL = f"https://v6.exchangerate-api.com/v6/{API_KEY}/latest/USD"
 # Cache de tasas de cambio
 exchange_rates = {}
 cache_expiration = datetime.utcnow()
+
+@app.get("/")
+@limiter.limit("5/minute")  # Máx. 5 solicitudes por minuto
+def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 def fetch_exchange_rates():
     """Obtiene tasas de cambio y actualiza la cache."""
